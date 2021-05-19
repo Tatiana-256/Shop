@@ -4,10 +4,18 @@ const sendToken = require("../utils/jwtToken");
 const catchAsyncErrors = require("../middleWares/catchAsyncErrors");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");
+const cloudinary = require("cloudinary")
 
 // Register user => api/v1/register
 
 exports.registerUser = catchAsyncErrors(async (req, res, next) => {
+
+  const result = await cloudinary.v2.uploader.upload(req.body.avatart,{
+    folder: "avatars",
+    width: 150,
+    crop: "scale"
+  })
+
   const { name, email, password } = req.body;
 
   const user = await User.create({
@@ -16,7 +24,7 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
     password,
     avatar: {
       public_id: "h3rt34n9e2m",
-      url: "/",
+      url: "https://i.pinimg.com/originals/51/f6/fb/51f6fb256629fc755b8870c801092942.png",
     },
   });
 
@@ -164,6 +172,10 @@ exports.updateProfile = catchAsyncErrors(async (req, res, next) => {
   };
 
   // update avatar
+if(req.body.avatar !== ""){
+  const user = await User.findById(req.user.id)
+  const image_id = user.avatar.public_id
+}
 
   const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
     new: true,
@@ -173,7 +185,6 @@ exports.updateProfile = catchAsyncErrors(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    // user,
   });
 });
 
