@@ -15,8 +15,8 @@ exports.registerUser = catchAsyncErrors(async (req, res, next) => {
     email,
     password,
     avatar: {
-      public_id: "fff",
-      url: "/ffff/",
+      public_id: "h3rt34n9e2m",
+      url: "/",
     },
   });
 
@@ -248,7 +248,7 @@ exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
       new ErrorHandler(`User does not found with id: ${req.params.id}`, 400)
     );
   }
-// Remove avatar from cloudinary
+  // Remove avatar from cloudinary
   await user.remove();
 
   res.status(200).json({

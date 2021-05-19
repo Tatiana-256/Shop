@@ -3,10 +3,12 @@ import thunk, { ThunkAction } from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension";
 import { productsReducer } from "./reducers/productsReducer";
 import { productDetailsReducer } from "./reducers/productDetailsReducer";
+import { userReducer } from "./reducers/userReduser";
 
 const reducers = combineReducers({
   products: productsReducer,
   product: productDetailsReducer,
+  user: userReducer,
 });
 
 const moddleware = [thunk];
