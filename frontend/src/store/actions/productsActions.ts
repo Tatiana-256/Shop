@@ -8,6 +8,7 @@ export const productsActions = {
     products: productT[];
     productCount: number;
     resPerPage: number;
+    filteredProductsCount: number;
   }) =>
     ({
       type: "ALL_PRODUCTS_SUCCESS",
@@ -26,15 +27,21 @@ export type productsActionType = InferActionsTypes<typeof productsActions>;
 
 type thunkType = baseThunkType<productsActionType>;
 
-export const getProducts = (keyWord = "", page = 1): thunkType => async (
-  dispatch
-) => {
+export const getProducts = (
+  keyWord = "",
+  page = 1,
+  price: number[],
+  category: string,
+  rating = 0
+): thunkType => async (dispatch) => {
   try {
-    debugger;
     dispatch(productsActions.getProductsRequest());
-    const { data } = await axios.get<any>(
-      `/api/v1/products?keyword=${keyWord}&page=${page}`
-    );
+
+    let link = `/api/v1/products?keyword=${keyWord}&page=${page}&price[lte]=${price[1]}&price[gte]=${price[0]}&ratings[gte]=${rating}`;
+    if (category) {
+      link = `/api/v1/products?keyword=${keyWord}&page=${page}&price[lte]=${price[1]}&price[gte]=${price[0]}&category=${category}`;
+    }
+    const { data } = await axios.get<any>(link);
     dispatch(productsActions.getProductsSuccess(data));
   } catch (error) {
     dispatch(productsActions.getProductsFail(error.response.data.message));

@@ -1,24 +1,50 @@
-import { MetaData } from "./layout/MetaData";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { RouteComponentProps } from "react-router-dom";
+import Slider from "rc-slider";
+import "rc-slider/assets/index.css";
+
+import { MetaData } from "./layout/MetaData";
 import { getProducts } from "../store/actions/productsActions";
 import { AppStateType } from "../store/store";
 import { Product } from "./Product/Product";
 import { Loader } from "./layout/Loader";
 import { useAlert } from "react-alert";
-import { Route, RouteComponentProps } from "react-router-dom";
 import Pagination from "react-js-pagination";
 
 interface MatchParams {
   keyword: string;
 }
 
+const { createSliderWithTooltip } = Slider;
+const Range = createSliderWithTooltip(Slider.Range);
+
 export const Home = ({ match }: RouteComponentProps<MatchParams>) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [price, setPrice] = useState([1, 1000]);
+  const [category, setCategory] = useState("");
+  const [rating, setRating] = useState(0);
 
-  const { loading, productsCount, error, products, resPerPage } = useSelector(
-    (state: AppStateType) => state.products
-  );
+  const categories = [
+    "Electronics",
+    "Cameras",
+    "Laptops",
+    "Accessories",
+    "Headphones",
+    "Food",
+    "Home",
+    "Another",
+    "Cameras",
+  ];
+
+  const {
+    loading,
+    productsCount,
+    error,
+    products,
+    resPerPage,
+    filteredProductsCount,
+  } = useSelector((state: AppStateType) => state.products);
 
   const alert = useAlert();
   const dispatch = useDispatch();
@@ -27,12 +53,12 @@ export const Home = ({ match }: RouteComponentProps<MatchParams>) => {
 
   useEffect(() => {
     debugger;
-    dispatch(getProducts(keyWord, currentPage));
+    dispatch(getProducts(keyWord, currentPage, price, category, rating));
 
     if (error) {
       alert.error(error);
     }
-  }, [dispatch, alert, error, currentPage, keyWord]);
+  }, [dispatch, alert, error, currentPage, keyWord, price, category, rating]);
 
   if (loading) {
     return <Loader />;
@@ -42,6 +68,11 @@ export const Home = ({ match }: RouteComponentProps<MatchParams>) => {
     setCurrentPage(page);
   };
 
+  let count = productsCount;
+  if (keyWord) {
+    count = filteredProductsCount;
+  }
+
   return (
     <>
       <MetaData title={"Buy the best products online"} />
@@ -49,14 +80,80 @@ export const Home = ({ match }: RouteComponentProps<MatchParams>) => {
 
       <section id="products" className="container mt-5">
         <div className="row">
-          {products &&
+          {keyWord ? (
+            <>
+              <div className="col-6 col-md-3 mt-5 mb-5">
+                <div className="px-5">
+                  <Range
+                    marks={{
+                      1: `$1`,
+                      1000: `1000`,
+                    }}
+                    min={1}
+                    max={1000}
+                    defaultValue={[1, 1000]}
+                    tipFormatter={(value) => `$${value}`}
+                    tipProps={{
+                      placement: "top",
+                      visible: true,
+                    }}
+                    value={price}
+                    onChange={(price) => setPrice(price)}
+                  />
+                  <hr className="my-5" />
+                  <div className="mt-5">
+                    <h4 className="md-3">Categories</h4>
+                    {categories.map((category) => (
+                      <li
+                        style={{
+                          cursor: "pointer",
+                          listStyleType: "none",
+                        }}
+                        key={category}
+                        onClick={() => setCategory(category)}
+                      >
+                        {category}
+                      </li>
+                    ))}
+                  </div>
+                  <div className="mt-3">
+                    <h4 className="md-3">Ratings</h4>
+                    {[5, 4, 3, 2, 1].map((star) => (
+                      <li
+                        style={{
+                          cursor: "pointer",
+                          listStyleType: "none",
+                        }}
+                        key={star}
+                        onClick={() => setRating(star)}
+                      >
+                        <div className="rating-outer">
+                          <div className="rating-inner" style={{
+                            width: `${star * 20}%`
+                          }}/>
+                        </div>
+                      </li>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="col-6 col-md-9">
+                <div className="row">
+                    {products.map((product) => (
+                      <Product key={product._id} product={product} col={4} />
+                    ))}
+                </div>
+              </div>
+            </>
+          ) : (
             products.map((product) => (
-              <Product key={product._id} product={product} />
-            ))}
+              <Product key={product._id} product={product} col={3} />
+            ))
+          )}
         </div>
       </section>
       <div className="d-flex justify-content-center mt-5">
-        {resPerPage <= productsCount && (
+        {resPerPage <= count && (
           <Pagination
             activePage={currentPage}
             itemsCountPerPage={resPerPage}

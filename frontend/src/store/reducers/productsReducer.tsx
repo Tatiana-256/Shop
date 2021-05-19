@@ -5,6 +5,7 @@ let initialState: initialStateType = {
   productsCount: 0,
   resPerPage: 8,
   loading: false,
+  filteredProductsCount: 0,
   error: null,
 };
 
@@ -26,6 +27,7 @@ export const productsReducer = (
         products: action.payload.products,
         productsCount: action.payload.productCount,
         resPerPage: action.payload.resPerPage,
+        filteredProductsCount: action.payload.filteredProductsCount,
       };
     case "ALL_PRODUCTS_FAIL":
       return {
@@ -49,6 +51,7 @@ type initialStateType = {
   resPerPage: number;
   productsCount: number;
   error: string | null;
+  filteredProductsCount: number;
 };
 
 export type productT = {

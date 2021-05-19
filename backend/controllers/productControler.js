@@ -24,18 +24,26 @@ exports.getProducts = catchAsyncErrors(async (req, res, next) => {
 
   const apiFeature = new APIFeature(Product.find(), req.query)
     .search()
-    .filter()
-    .pagination(resPerPage);
+    .filter();
 
-  const products = await apiFeature.query;
+  let products = await apiFeature.query;
+  let filteredProductsCount = products.length;
 
-  res.status(200).json({
-    success: true,
-    count: products.length,
-    productCount,
-    products,
-    resPerPage,
-  });
+  apiFeature.pagination(resPerPage)
+  products = await apiFeature.query// .pagination(resPerPage); // pagination(resPerPage);
+  //
+  // const products = await apiFeature.query;
+
+  res
+    .status(200)
+    .json({
+      success: true,
+      count: products.length,
+      productCount,
+      products: products,
+      filteredProductsCount,
+      resPerPage,
+    });
 });
 
 // Get single product => /api/v1/product/:id
